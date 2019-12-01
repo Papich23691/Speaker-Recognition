@@ -3,13 +3,14 @@
 #include "portaudio.h"
 #include "record.h"
 
+/* Recording function used by portaudio engine per frame to save data */
 int recordCallback( const void *inputBuffer, void *outputBuffer,
                            unsigned long framesPerBuffer,
                            const PaStreamCallbackTimeInfo* timeInfo,
                            PaStreamCallbackFlags statusFlags,
                            void *userData )
 {
-    paTestData *data = (paTestData*)userData;
+    paData *data = (paData*)userData;
     const SAMPLE *rptr = (const SAMPLE*)inputBuffer;
     SAMPLE *wptr = &data->recordedSamples[data->frameIndex * NUM_CHANNELS];
     long framesToCalc;
@@ -52,12 +53,17 @@ int recordCallback( const void *inputBuffer, void *outputBuffer,
     data->frameIndex += framesToCalc;
     return finished;
 }
-int record( int seconds , SAMPLE **recording)
+
+/* 
+ * Record audio for selected seconds 
+ * and save into paData type.
+ */
+int record( int seconds , paData *recording)
 {
     PaStreamParameters inputParameters;
     PaStream *stream;
     PaError err = paNoError;
-    static paTestData data;
+    static paData data;
     int i;
     int totalFrames;
     int numSamples;
@@ -99,7 +105,7 @@ int record( int seconds , SAMPLE **recording)
         NULL, /* &outputParameters, */
         SAMPLE_RATE,
         FRAMES_PER_BUFFER,
-        paClipOff, /* we won't output out of range samples so don't bother clipping them */
+        paClipOff, 
         recordCallback,
         &data);
     if (err != paNoError)
@@ -108,11 +114,8 @@ int record( int seconds , SAMPLE **recording)
     err = Pa_StartStream(stream);
     if (err != paNoError)
         return 1;
-    printf("\n=== Now recording!! Please speak into the microphone. ===\n");
-    fflush(stdout);
-
-    while ((err = Pa_IsStreamActive(stream)) == 1)
-        ;
+        
+    while ((err = Pa_IsStreamActive(stream)) == 1);
     if (err < 0)
         return 1;
 
@@ -120,17 +123,18 @@ int record( int seconds , SAMPLE **recording)
     if (err != paNoError)
         return 1;
 
-    *recording = data.recordedSamples;
+    *recording = data;
     return 0;
 }
 
+/* Playback function used by portaudio engine per frame to play data */
 int playCallback( const void *inputBuffer, void *outputBuffer,
                          unsigned long framesPerBuffer,
                          const PaStreamCallbackTimeInfo* timeInfo,
                          PaStreamCallbackFlags statusFlags,
                          void *userData )
 {
-    paTestData *data = (paTestData*)userData;
+    paData *data = (paData*)userData;
     SAMPLE *rptr = &data->recordedSamples[data->frameIndex * NUM_CHANNELS];
     SAMPLE *wptr = (SAMPLE*)outputBuffer;
     unsigned int i;
@@ -169,5 +173,52 @@ int playCallback( const void *inputBuffer, void *outputBuffer,
         finished = paContinue;
     }
     return finished;
+}
+
+/* Play audio using saved paData audio */
+int playback(paData data){
+    PaError err = paNoError;
+    PaStream *stream;
+    PaStreamParameters outputParameters;
+    data.frameIndex = 0;
+
+    outputParameters.device = Pa_GetDefaultOutputDevice(); /* default output device */
+    if (outputParameters.device == paNoDevice)
+    {
+        fprintf(stderr, "Error: No default output device.\n");
+        return 1;
+    }
+    outputParameters.channelCount = 2; /* stereo output */
+    outputParameters.sampleFormat = PA_SAMPLE_TYPE;
+    outputParameters.suggestedLatency = Pa_GetDeviceInfo(outputParameters.device)->defaultLowOutputLatency;
+    outputParameters.hostApiSpecificStreamInfo = NULL;
+
+    err = Pa_OpenStream(
+        &stream,
+        NULL, /* no input */
+        &outputParameters,
+        SAMPLE_RATE,
+        FRAMES_PER_BUFFER,
+        paClipOff, /* we won't output out of range samples so don't bother clipping them */
+        playCallback,
+        &data);
+    if (err != paNoError)
+        return 1;
+
+    if (stream)
+    {
+        err = Pa_StartStream(stream);
+        if (err != paNoError)
+            return 1;
+
+        while ((err = Pa_IsStreamActive(stream)) == 1);
+        if (err < 0)
+            return 1;
+
+        err = Pa_CloseStream(stream);
+        if (err != paNoError)
+            return 1;
+    }
+    return 0;
 }
 

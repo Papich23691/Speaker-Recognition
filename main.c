@@ -4,10 +4,8 @@
 
 int main(void)
 {
-   SAMPLE *recording;
-   record(5,&recording);
-   for (int i=0;i<SAMPLE_RATE;i++){
-       printf("%d = %f\n",i,recording[i]);
-   }
-   return 0;
+    paData data;
+    record(5, &data);
+    playback(data);
+    return 0;
 }

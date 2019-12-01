@@ -2,7 +2,7 @@
 
 #define SAMPLE_RATE  (44100)
 #define FRAMES_PER_BUFFER (512)
-#define NUM_CHANNELS    (2)
+#define NUM_CHANNELS    (1)
 
 /* Select sample format. */
 #define PA_SAMPLE_TYPE  paFloat32
@@ -17,7 +17,7 @@ typedef struct
     int          maxFrameIndex;
     SAMPLE      *recordedSamples;
 }
-paTestData;
+paData;
 
 int recordCallback( const void *inputBuffer, void *outputBuffer,
                            unsigned long framesPerBuffer,
@@ -25,10 +25,12 @@ int recordCallback( const void *inputBuffer, void *outputBuffer,
                            PaStreamCallbackFlags statusFlags,
                            void *userData );
 
-int record(int seconds, SAMPLE **recording);
+int record(int seconds, paData *recording);
 
 int playCallback( const void *inputBuffer, void *outputBuffer,
                          unsigned long framesPerBuffer,
                          const PaStreamCallbackTimeInfo* timeInfo,
                          PaStreamCallbackFlags statusFlags,
                          void *userData );
+
+int playback(paData data);
