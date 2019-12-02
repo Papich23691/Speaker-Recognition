@@ -2,7 +2,7 @@
 
 #define SAMPLE_RATE  (44100)
 #define FRAMES_PER_BUFFER (512)
-#define NUM_CHANNELS    (1)
+#define NUM_CHANNELS    (2)
 
 /* Select sample format. */
 #define PA_SAMPLE_TYPE  paFloat32
