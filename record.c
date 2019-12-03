@@ -4,26 +4,26 @@
 #include "record.h"
 
 /* Recording function used by portaudio engine per frame to save data */
-int recordCallback( const void *inputBuffer, void *outputBuffer,
-                           unsigned long framesPerBuffer,
-                           const PaStreamCallbackTimeInfo* timeInfo,
-                           PaStreamCallbackFlags statusFlags,
-                           void *userData )
+int recordCallback(const void *inputBuffer, void *outputBuffer,
+                   unsigned long framesPerBuffer,
+                   const PaStreamCallbackTimeInfo *timeInfo,
+                   PaStreamCallbackFlags statusFlags,
+                   void *userData)
 {
-    paData *data = (paData*)userData;
-    const SAMPLE *rptr = (const SAMPLE*)inputBuffer;
-    SAMPLE *wptr = &data->recordedSamples[data->frameIndex * NUM_CHANNELS];
+    paData *data = (paData *)userData;
+    const float *rptr = (const float *)inputBuffer;
+    float *wptr = &data->recordedSamples[data->frameIndex * NUM_CHANNELS];
     long framesToCalc;
     long i;
     int finished;
     unsigned long framesLeft = data->maxFrameIndex - data->frameIndex;
 
-    (void) outputBuffer; /* Prevent unused variable warnings. */
-    (void) timeInfo;
-    (void) statusFlags;
-    (void) userData;
+    (void)outputBuffer; /* Prevent unused variable warnings. */
+    (void)timeInfo;
+    (void)statusFlags;
+    (void)userData;
 
-    if( framesLeft < framesPerBuffer )
+    if (framesLeft < framesPerBuffer)
     {
         framesToCalc = framesLeft;
         finished = paComplete;
@@ -34,20 +34,22 @@ int recordCallback( const void *inputBuffer, void *outputBuffer,
         finished = paContinue;
     }
 
-    if( inputBuffer == NULL )
+    if (inputBuffer == NULL)
     {
-        for( i=0; i<framesToCalc; i++ )
+        for (i = 0; i < framesToCalc; i++)
         {
-            *wptr++ = SAMPLE_SILENCE;  /* left */
-            if( NUM_CHANNELS == 2 ) *wptr++ = SAMPLE_SILENCE;  /* right */
+            *wptr++ = SAMPLE_SILENCE; /* left */
+            if (NUM_CHANNELS == 2)
+                *wptr++ = SAMPLE_SILENCE; /* right */
         }
     }
     else
     {
-        for( i=0; i<framesToCalc; i++ )
+        for (i = 0; i < framesToCalc; i++)
         {
-            *wptr++ = *rptr++;  /* left */
-            if( NUM_CHANNELS == 2 ) *wptr++ = *rptr++;  /* right */
+            *wptr++ = *rptr++; /* left */
+            if (NUM_CHANNELS == 2)
+                *wptr++ = *rptr++; /* right */
         }
     }
     data->frameIndex += framesToCalc;
@@ -55,10 +57,10 @@ int recordCallback( const void *inputBuffer, void *outputBuffer,
 }
 
 /* 
- * Record audio for selected seconds 
+ * Record audio for selected defined seconds 
  * and save into paData type.
  */
-int record( int seconds , paData *recording)
+int record(paData *recording)
 {
     PaStreamParameters inputParameters;
     PaStream *stream;
@@ -69,11 +71,11 @@ int record( int seconds , paData *recording)
     int numSamples;
     int numBytes;
 
-    data.maxFrameIndex = totalFrames = seconds * SAMPLE_RATE; /* Record for a few seconds. */
+    data.maxFrameIndex = totalFrames = SECONDS * SAMPLE_RATE; /* Record for a few SECONDS. */
     data.frameIndex = 0;
     numSamples = totalFrames * NUM_CHANNELS;
-    numBytes = numSamples * sizeof(SAMPLE);
-    data.recordedSamples = (SAMPLE *)malloc(numBytes); /* From now on, recordedSamples is initialised. */
+    numBytes = numSamples * sizeof(float);
+    data.recordedSamples = (float *)malloc(numBytes); /* From now on, recordedSamples is initialised. */
     if (data.recordedSamples == NULL)
     {
         printf("Could not allocate record array.\n");
@@ -105,7 +107,7 @@ int record( int seconds , paData *recording)
         NULL, /* &outputParameters, */
         SAMPLE_RATE,
         FRAMES_PER_BUFFER,
-        paClipOff, 
+        paClipOff,
         recordCallback,
         &data);
     if (err != paNoError)
@@ -114,8 +116,9 @@ int record( int seconds , paData *recording)
     err = Pa_StartStream(stream);
     if (err != paNoError)
         return 1;
-        
-    while ((err = Pa_IsStreamActive(stream)) == 1);
+
+    while ((err = Pa_IsStreamActive(stream)) == 1)
+        ;
     if (err < 0)
         return 1;
 
@@ -128,46 +131,49 @@ int record( int seconds , paData *recording)
 }
 
 /* Playback function used by portaudio engine per frame to play data */
-int playCallback( const void *inputBuffer, void *outputBuffer,
-                         unsigned long framesPerBuffer,
-                         const PaStreamCallbackTimeInfo* timeInfo,
-                         PaStreamCallbackFlags statusFlags,
-                         void *userData )
+int playCallback(const void *inputBuffer, void *outputBuffer,
+                 unsigned long framesPerBuffer,
+                 const PaStreamCallbackTimeInfo *timeInfo,
+                 PaStreamCallbackFlags statusFlags,
+                 void *userData)
 {
-    paData *data = (paData*)userData;
-    SAMPLE *rptr = &data->recordedSamples[data->frameIndex * NUM_CHANNELS];
-    SAMPLE *wptr = (SAMPLE*)outputBuffer;
+    paData *data = (paData *)userData;
+    float *rptr = &data->recordedSamples[data->frameIndex * NUM_CHANNELS];
+    float *wptr = (float *)outputBuffer;
     unsigned int i;
     int finished;
     unsigned int framesLeft = data->maxFrameIndex - data->frameIndex;
 
-    (void) inputBuffer; /* Prevent unused variable warnings. */
-    (void) timeInfo;
-    (void) statusFlags;
-    (void) userData;
+    (void)inputBuffer; /* Prevent unused variable warnings. */
+    (void)timeInfo;
+    (void)statusFlags;
+    (void)userData;
 
-    if( framesLeft < framesPerBuffer )
+    if (framesLeft < framesPerBuffer)
     {
         /* final buffer... */
-        for( i=0; i<framesLeft; i++ )
+        for (i = 0; i < framesLeft; i++)
         {
-            *wptr++ = *rptr++;  /* left */
-            if( NUM_CHANNELS == 2 ) *wptr++ = *rptr++;  /* right */
+            *wptr++ = *rptr++; /* left */
+            if (NUM_CHANNELS == 2)
+                *wptr++ = *rptr++; /* right */
         }
-        for( ; i<framesPerBuffer; i++ )
+        for (; i < framesPerBuffer; i++)
         {
-            *wptr++ = 0;  /* left */
-            if( NUM_CHANNELS == 2 ) *wptr++ = 0;  /* right */
+            *wptr++ = 0; /* left */
+            if (NUM_CHANNELS == 2)
+                *wptr++ = 0; /* right */
         }
         data->frameIndex += framesLeft;
         finished = paComplete;
     }
     else
     {
-        for( i=0; i<framesPerBuffer; i++ )
+        for (i = 0; i < framesPerBuffer; i++)
         {
-            *wptr++ = *rptr++;  /* left */
-            if( NUM_CHANNELS == 2 ) *wptr++ = *rptr++;  /* right */
+            *wptr++ = *rptr++; /* left */
+            if (NUM_CHANNELS == 2)
+                *wptr++ = *rptr++; /* right */
         }
         data->frameIndex += framesPerBuffer;
         finished = paContinue;
@@ -176,7 +182,8 @@ int playCallback( const void *inputBuffer, void *outputBuffer,
 }
 
 /* Play audio using saved paData audio */
-int playback(paData data){
+int playback(paData data)
+{
     PaError err = paNoError;
     PaStream *stream;
     PaStreamParameters outputParameters;
@@ -211,7 +218,8 @@ int playback(paData data){
         if (err != paNoError)
             return 1;
 
-        while ((err = Pa_IsStreamActive(stream)) == 1);
+        while ((err = Pa_IsStreamActive(stream)) == 1)
+            ;
         if (err < 0)
             return 1;
 
