@@ -11,7 +11,8 @@ int main(void)
     float *arr = (float *)malloc(sizeof(float) * data.maxFrameIndex);
     data_pre_emphasis(data, &arr);
     float frames[FRAMES][(int)(FRAME_SIZE * SAMPLE_RATE)];
-    memcpy(frames, framing(arr),  sizeof(frames));
+    memcpy(frames, framing(arr), sizeof(frames));
     free(arr);
+    window(&frames);
     return 0;
 }

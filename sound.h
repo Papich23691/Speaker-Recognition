@@ -8,3 +8,4 @@
 
 void data_pre_emphasis(paData data, float **arr);
 float **framing(float *recording);
+void window(float (*frames)[FRAMES][(int)(FRAME_SIZE * SAMPLE_RATE)]);
