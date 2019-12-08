@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <complex.h> 
 #include "record.h"
 
 #define PRE_EMPHASIS 0.97
@@ -9,3 +10,4 @@
 void data_pre_emphasis(paData data, float **arr);
 float **framing(float *recording);
 void window(float (*frames)[FRAMES][(int)(FRAME_SIZE * SAMPLE_RATE)]);
+void fft(float complex *samples,float complex **out,int N);
