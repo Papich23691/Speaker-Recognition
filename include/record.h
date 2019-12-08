@@ -5,14 +5,13 @@
 #define NUM_CHANNELS (2)
 #define SECONDS 5
 
-/* Select sample format. */
 #define PA_SAMPLE_TYPE paFloat32
 #define SAMPLE_SILENCE (0.0f)
 #define PRINTF_S_FORMAT "%.8f"
 
 typedef struct
 {
-    int frameIndex; /* Index into sample array. */
+    int frameIndex;
     int maxFrameIndex;
     float *recordedSamples;
 } paData;

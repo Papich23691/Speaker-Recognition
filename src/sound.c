@@ -9,6 +9,10 @@ void data_pre_emphasis(paData data, float **arr)
         (*arr)[i / 2] = data.recordedSamples[i] - PRE_EMPHASIS * data.recordedSamples[i - 2];
 }
 
+/* 
+ * Dividing the data into frames of 25 ms 
+ * with 10 ms stride 
+ */
 float **framing(float *recording)
 {
     int i, j, k = 0;
@@ -22,6 +26,7 @@ float **framing(float *recording)
     return frames;
 }
 
+/* Hamming Window */
 void window(float (*frames)[FRAMES][(int)(FRAME_SIZE * SAMPLE_RATE)])
 {
     for (int i = 0; i < FRAMES; i++)
@@ -31,6 +36,10 @@ void window(float (*frames)[FRAMES][(int)(FRAME_SIZE * SAMPLE_RATE)])
     }
 }
 
+/* 
+ * Recursive Fast Fourier Transform
+ * N - Size of samples array
+ */
 void fft(float complex *samples,float complex **out,int N)
 {
     if (N > 1)
