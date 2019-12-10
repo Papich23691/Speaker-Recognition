@@ -13,7 +13,7 @@ int main(void)
     /* Pre emphasis and framing */
     float *arr = (float *)malloc(sizeof(float) * data.maxFrameIndex);
     data_pre_emphasis(data, &arr);
-    float frames[FRAMES][(int)(FRAME_SIZE * SAMPLE_RATE)];
+    float complex frames[FRAMES][FRAME_SIZE];
     memcpy(frames, framing(arr), sizeof(frames));
     free(arr);
 
@@ -21,8 +21,13 @@ int main(void)
     window(&frames);
 
     /* Fast Fourier Transform */
-    double complex *bins = (float complex *)malloc(sizeof(float complex) * (int)(FRAME_SIZE * SAMPLE_RATE));
-    fft(frames[100],&bins,(int)(FRAME_SIZE * SAMPLE_RATE));
+    float complex *bins = (float complex *)malloc(sizeof(float complex) * FRAME_SIZE);
+    for (int i=0;i<FRAMES;i++)
+    {
+        fft(frames[i],&bins,FRAME_SIZE);
+        /* Power Spectrum */
+        power_spectrum(&bins);
+    }
     free(bins);
     return 0;
 }

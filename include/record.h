@@ -1,6 +1,6 @@
 #include "portaudio.h"
 
-#define SAMPLE_RATE (44000)
+#define SAMPLE_RATE (44100)
 #define FRAMES_PER_BUFFER (512)
 #define NUM_CHANNELS (2)
 #define SECONDS 5

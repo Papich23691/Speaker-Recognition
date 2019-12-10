@@ -10,16 +10,16 @@ void data_pre_emphasis(paData data, float **arr)
 }
 
 /* 
- * Dividing the data into frames of 25 ms 
- * with 10 ms stride 
+ * Dividing the data into frames of 1024 samples
+ * with 512 sample stride 
  */
-float **framing(float *recording)
+float complex **framing(float *recording)
 {
     int i, j, k = 0;
-    static float frames[FRAMES][(int)(FRAME_SIZE * SAMPLE_RATE)];
-    for (i = 0; i < (SECONDS * SAMPLE_RATE) - (FRAME_SIZE * SAMPLE_RATE); i += (FRAME_SIZE - STRIDE) * SAMPLE_RATE)
+    static float complex frames[FRAMES][FRAME_SIZE];
+    for (i = 0; i < (SECONDS * SAMPLE_RATE) - FRAME_SIZE; i += (FRAME_SIZE - STRIDE))
     {
-        for (j = 0; j < (FRAME_SIZE * SAMPLE_RATE); j++)
+        for (j = 0; j < FRAME_SIZE; j++)
             frames[k][j] = recording[i + j];
         ++k;
     }
@@ -27,12 +27,12 @@ float **framing(float *recording)
 }
 
 /* Hamming Window */
-void window(float (*frames)[FRAMES][(int)(FRAME_SIZE * SAMPLE_RATE)])
+void window(float complex (*frames)[FRAMES][FRAME_SIZE])
 {
     for (int i = 0; i < FRAMES; i++)
     {
-        for (int j = 0; j < (FRAME_SIZE * SAMPLE_RATE); j++)
-            (*frames)[i][j] *= 0.54 - (0.46 * cos((2 * M_PI * j) / ((FRAME_SIZE * SAMPLE_RATE) - 1)));
+        for (int j = 0; j < FRAME_SIZE ; j++)
+            (*frames)[i][j] *= 0.54 - (0.46 * cos((2 * M_PI * j) / (FRAME_SIZE - 1)));
     }
 }
 
@@ -65,4 +65,10 @@ void fft(float complex *samples,float complex **out,int N)
         free(even);
         free(odd);
     }
+}
+
+void power_spectrum(float complex **bins)
+{
+    for (int i=0;i<FRAME_SIZE;i++)
+        (*bins)[i] = ((creal((*bins)[i]) * creal((*bins)[i])) + (cimag((*bins)[i])*cimag((*bins)[i]))) / FRAME_SIZE;
 }
