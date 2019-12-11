@@ -37,7 +37,7 @@ void filter_banks(float complex *bins, float *banks[FILTERS])
             frequency = creal(bins[j]);
             sum += filter * frequency;
         }
-        (*banks)[i] = sum;
+        (*banks)[i] = log10(sum);
     }
 }
 
@@ -91,9 +91,7 @@ void mfcc(float *f_vector[MEL_COEFFICIENTS])
         /* Getting MFCC coefficients */
         dct(filters, &mc);
         for (j = 0; j < MEL_COEFFICIENTS; j++)
-        {
             (*f_vector)[j] += (float)mc[j];
-        }
     }
     free(mc);
     free(filters);

@@ -7,5 +7,6 @@ int main(void)
 {
     float *f_vector = (float *)malloc(sizeof(float) * MEL_COEFFICIENTS);
     mfcc(&f_vector);
+    free(f_vector);
     return 0;
 }
