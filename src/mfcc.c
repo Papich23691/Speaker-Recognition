@@ -44,20 +44,52 @@ void filter_banks(float complex *bins, float *banks[FILTERS])
 void dct(float banks[FILTERS], float *mfcc[FILTERS])
 {
     int i, j;
-    float ci, dct, sum = 0;
+    float sum;
     for (i = 0; i < FILTERS; i++)
     {
         sum = 0;
-        if (!i)
-            ci = 1 / sqrt(FILTERS);
-        else
-            ci = sqrt(2) / sqrt(FILTERS);
         for (j = 0; j < FILTERS; j++)
-        {
-            dct = banks[j] * cos((2 * j + 1) * i * M_PI / (2 * FILTERS));
-            sum += dct;
-        }
-        (*mfcc)[i] = ci * sum;
+            sum += banks[j] * cos((2 * j + 1) * i * M_PI / (FILTERS * 2));
+
+        (*mfcc)[i] = 2 * sum;
     }
 }
 
+void mfcc(float *f_vector[MEL_COEFFICIENTS])
+{
+    /* Recording */
+    paData data;
+    record(&data);
+    playback(data);
+
+    /* Pre emphasis and framing */
+    float *arr = (float *)malloc(sizeof(float) * data.maxFrameIndex);
+    data_pre_emphasis(data, &arr);
+    float complex frames[FRAMES][FRAME_SIZE];
+    memcpy(frames, framing(arr), sizeof(frames));
+    free(arr);
+
+    /* Hamming Window */
+    window(&frames);
+
+    /* Fast Fourier Transform */
+    float complex *bins = (float complex *)malloc(sizeof(float complex) * FRAME_SIZE);
+    float *filters = (float *)malloc(sizeof(float) * FILTERS);
+    float *mc = (float *)malloc(sizeof(float) * FILTERS);
+    for (int i = 0; i < FRAMES; i++)
+    {
+        fft(frames[i], &bins, FRAME_SIZE);
+
+        /* Power Spectrum */
+        power_spectrum(&bins);
+
+        /* Passing through mel filter banks */
+        filter_banks(bins, &filters);
+
+        /* Getting MFCC coefficients */
+        dct(filters, &mc);
+    }
+    free(mc);
+    free(filters);
+    free(bins);
+}
