@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <math.h>
 #include "sound.h"
 
 void data_pre_emphasis(paData data, float **arr)

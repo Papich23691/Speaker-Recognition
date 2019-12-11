@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "sound.h"
+#include "mfcc.h"
 
 int main(void)
 {
@@ -22,12 +22,19 @@ int main(void)
 
     /* Fast Fourier Transform */
     float complex *bins = (float complex *)malloc(sizeof(float complex) * FRAME_SIZE);
+    float *filters = (float *)malloc(sizeof(float) * FILTERS);
     for (int i=0;i<FRAMES;i++)
     {
         fft(frames[i],&bins,FRAME_SIZE);
+        
         /* Power Spectrum */
         power_spectrum(&bins);
+
+        /* Passing through mel filter banks */
+        filter_banks(bins,&filters);
+        
     }
+    free(filters);
     free(bins);
     return 0;
 }

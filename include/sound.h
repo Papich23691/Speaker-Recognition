@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <complex.h> 
+#include <math.h>
 #include "record.h"
 
 #define PRE_EMPHASIS 0.97
@@ -7,6 +8,7 @@
 #define STRIDE 512
 #define FRAMES (int)(((SECONDS * SAMPLE_RATE) - FRAME_SIZE ) / (FRAME_SIZE - STRIDE)) + 1
 #define TO_HZ(bin) bin * (int)(SAMPLE_RATE/FRAME_SIZE)
+#define TO_BIN(f)  (int)(f * FRAME_SIZE/SAMPLE_RATE)
 
 void data_pre_emphasis(paData data, float **arr);
 float complex **framing(float *recording);
