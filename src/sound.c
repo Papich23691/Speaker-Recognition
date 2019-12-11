@@ -28,9 +28,10 @@ float complex **framing(float *recording)
 /* Hamming Window */
 void window(float complex (*frames)[FRAMES][FRAME_SIZE])
 {
-    for (int i = 0; i < FRAMES; i++)
+    int i,j;
+    for (i = 0; i < FRAMES; i++)
     {
-        for (int j = 0; j < FRAME_SIZE; j++)
+        for (j = 0; j < FRAME_SIZE; j++)
             (*frames)[i][j] *= 0.54 - (0.46 * cos((2 * M_PI * j) / (FRAME_SIZE - 1)));
     }
 }
@@ -44,6 +45,7 @@ void fft(float complex *samples, float complex **out, int N)
     if (N > 1)
     {
         int i;
+        float complex w;
         float complex *even = (float complex *)malloc(sizeof(float complex) * (int)N / 2);
         float complex *odd = (float complex *)malloc(sizeof(float complex) * (int)N / 2);
         for (i = 0; i < (int)N / 2; i++)
@@ -57,7 +59,7 @@ void fft(float complex *samples, float complex **out, int N)
 
         for (i = 0; i < (int)N / 2; i++)
         {
-            float complex w = cexp(-I * 2 * M_PI * i / N) * odd[i];
+            complex w = cexp(-I * 2 * M_PI * i / N) * odd[i];
             (*out)[i] = even[i] + w;
             (*out)[i + N / 2] = even[i] - w;
         }
