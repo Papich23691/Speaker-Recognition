@@ -26,13 +26,13 @@ float complex **framing(float *recording)
 }
 
 /* Hamming Window */
-void window(float complex (*frames)[FRAMES][FRAME_SIZE])
+void window(float complex frames[FRAMES][FRAME_SIZE])
 {
     int i,j;
     for (i = 0; i < FRAMES; i++)
     {
         for (j = 0; j < FRAME_SIZE; j++)
-            (*frames)[i][j] *= 0.54 - (0.46 * cos((2 * M_PI * j) / (FRAME_SIZE - 1)));
+            frames[i][j] *= 0.54 - (0.46 * cos((2 * M_PI * j) / (FRAME_SIZE - 1)));
     }
 }
 

@@ -12,6 +12,6 @@
 
 void data_pre_emphasis(paData data, float **arr);
 float complex **framing(float *recording);
-void window(float complex (*frames)[FRAMES][FRAME_SIZE]);
+void window(float complex frames[FRAMES][FRAME_SIZE]);
 void fft(float complex *samples, float complex **out, int N);
 void power_spectrum(float complex **bins);

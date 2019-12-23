@@ -110,8 +110,22 @@ float compare(float speaker1[CODEWORDS][MEL_COEFFICIENTS + 1], float speaker2[CO
 {
     float dis1 = 0;
     int i, j;
-    for ( i = 0; i < CODEWORDS; i++)
-        for ( j = 0; j < CODEWORDS; j++)
+    for (i = 0; i < CODEWORDS; i++)
+        for (j = 0; j < CODEWORDS; j++)
             dis1 += e_dis(speaker1[i], speaker2[j], MEL_COEFFICIENTS);
     return (dis1 / (CODEWORDS * CODEWORDS));
+}
+
+void save(float speaker[CODEWORDS][MEL_COEFFICIENTS + 1], char *name)
+{
+    FILE *f = fopen(name, "wb");
+    fwrite(speaker, sizeof(speaker), 1, f);
+    fclose(f);
+}
+
+void load(float speaker[CODEWORDS][MEL_COEFFICIENTS + 1], char *name)
+{
+    FILE *f = fopen(name, "rb");
+    fread(speaker, sizeof(speaker), 1, f);
+    fclose(f);
 }

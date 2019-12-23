@@ -75,13 +75,13 @@ void mfcc(float f_vector[FRAMES][MEL_COEFFICIENTS])
     free(arr);
 
     /* Hamming Window */
-    window(&frames);
+    window(frames);
 
     for (i = 0; i < FRAMES; i++)
     {
         /* Fast Fourier Transform */
         fft(frames[i], &bins, FRAME_SIZE);
-
+        
         /* Power Spectrum */
         power_spectrum(&bins);
 
