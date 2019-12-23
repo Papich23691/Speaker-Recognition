@@ -13,4 +13,4 @@ void random_v(float codebook[CODEWORDS][MEL_COEFFICIENTS + 1], float f_vector[FR
 void model(float codebook[CODEWORDS][MEL_COEFFICIENTS + 1]);
 float compare(float speaker1[CODEWORDS][MEL_COEFFICIENTS + 1], float speaker2[CODEWORDS][MEL_COEFFICIENTS + 1]);
 void save(float speaker[CODEWORDS][MEL_COEFFICIENTS + 1], char *name);
-void load(float speaker[CODEWORDS][MEL_COEFFICIENTS + 1], char *name);
+void load(float (*speaker)[CODEWORDS][MEL_COEFFICIENTS + 1], char *name);

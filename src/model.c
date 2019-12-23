@@ -127,13 +127,13 @@ float compare(float speaker1[CODEWORDS][MEL_COEFFICIENTS + 1], float speaker2[CO
 void save(float speaker[CODEWORDS][MEL_COEFFICIENTS + 1], char *name)
 {
     FILE *f = fopen(name, "wb");
-    fwrite(speaker, sizeof(speaker), 1, f);
+    fwrite(speaker, sizeof(float),CODEWORDS * (MEL_COEFFICIENTS + 1), f);
     fclose(f);
 }
 
-void load(float speaker[CODEWORDS][MEL_COEFFICIENTS + 1], char *name)
+void load(float (*speaker)[CODEWORDS][MEL_COEFFICIENTS + 1], char *name)
 {
     FILE *f = fopen(name, "rb");
-    fread(speaker, sizeof(speaker), 1, f);
+    fread(speaker, sizeof(float),CODEWORDS * (MEL_COEFFICIENTS + 1), f);
     fclose(f);
 }
