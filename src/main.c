@@ -5,14 +5,7 @@
 
 int main(void)
 {
-    float f_vector1[FRAMES][MEL_COEFFICIENTS];
-    float speaker1[CODEWORDS][MEL_COEFFICIENTS + 1];
-    float f_vector2[FRAMES][MEL_COEFFICIENTS];
-    float speaker2[CODEWORDS][MEL_COEFFICIENTS + 1];
-
-    mfcc(f_vector1);
-    codebook(speaker1, f_vector1);
-    save(f_vector1,"speaker.data");
-
+    float speaker[CODEWORDS][MEL_COEFFICIENTS + 1];
+    model(speaker);
     return 0;
 }

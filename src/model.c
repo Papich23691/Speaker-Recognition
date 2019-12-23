@@ -37,9 +37,12 @@ void add(float *v1, float *v2, int dimension)
 /* Divides vector */
 void v_div(float *v1, float d, int dimension)
 {
-    int i;
-    for (i = 0; i < dimension; i++)
-        v1[i] /= d;
+    if (d)
+    {
+        int i;
+        for (i = 0; i < dimension; i++)
+            v1[i] /= d;
+    }
 }
 
 /* Picks random centroids */
@@ -60,25 +63,30 @@ void random_v(float codebook[CODEWORDS][MEL_COEFFICIENTS + 1], float f_vector[FR
 }
 
 /* GLA Vector Quantization */
-void codebook(float codebook[CODEWORDS][MEL_COEFFICIENTS + 1], float f_vector[FRAMES][MEL_COEFFICIENTS])
+void model(float codebook[CODEWORDS][MEL_COEFFICIENTS + 1])
 {
     int i, j, min_c;
     int clusters[FRAMES];
     float distortion = 0, pre = 1, min, distance;
-    random_v(codebook, f_vector);
+    static float codebook2[CODEWORDS][MEL_COEFFICIENTS + 1];
+    float f_vector[FRAMES][MEL_COEFFICIENTS];
+    mfcc(f_vector);
+    random_v(codebook2, f_vector);
 
     while (abs(pre - distortion) > 0)
     {
         pre = distortion;
+        memcpy(codebook, codebook2, sizeof(codebook2));
         distortion = 0;
+
         /* Clustering */
         for (i = 0; i < FRAMES; i++)
         {
             min_c = 0;
-            min = e_dis(f_vector[i], codebook[0], MEL_COEFFICIENTS);
+            min = e_dis(f_vector[i], codebook2[0], MEL_COEFFICIENTS);
             for (j = 1; j < CODEWORDS; j++)
             {
-                distance = (float)sqrt(e_dis(f_vector[i], codebook[j], MEL_COEFFICIENTS));
+                distance = (float)sqrt(e_dis(f_vector[i], codebook2[j], MEL_COEFFICIENTS));
                 if (distance < min)
                 {
                     min_c = j;
@@ -87,33 +95,33 @@ void codebook(float codebook[CODEWORDS][MEL_COEFFICIENTS + 1], float f_vector[FR
             }
             clusters[i] = min_c;
         }
-        memset(codebook, 0, sizeof(codebook));
+        memset(codebook2, 0, sizeof(codebook2));
 
         /* Moving centroids */
         for (i = 0; i < FRAMES; i++)
         {
-            add(codebook[clusters[i]], f_vector[i], MEL_COEFFICIENTS);
-            ++codebook[clusters[i]][MEL_COEFFICIENTS];
+            add(codebook2[clusters[i]], f_vector[i], MEL_COEFFICIENTS);
+            ++codebook2[clusters[i]][MEL_COEFFICIENTS];
         }
 
         for (i = 0; i < CODEWORDS; i++)
-            v_div(codebook[i], codebook[i][MEL_COEFFICIENTS], MEL_COEFFICIENTS);
+            v_div(codebook2[i], codebook2[i][MEL_COEFFICIENTS], MEL_COEFFICIENTS);
 
         /* distortion */
         for (i = 0; i < FRAMES; i++)
-            distortion += (float)e_dis(codebook[clusters[i]], f_vector[i], MEL_COEFFICIENTS) / (FRAMES);
+            distortion += (float)e_dis(codebook2[clusters[i]], f_vector[i], MEL_COEFFICIENTS) / (FRAMES);
     }
 }
 
 /* Compared by using average distortion */
 float compare(float speaker1[CODEWORDS][MEL_COEFFICIENTS + 1], float speaker2[CODEWORDS][MEL_COEFFICIENTS + 1])
 {
-    float dis1 = 0;
+    float dis = 0;
     int i, j;
     for (i = 0; i < CODEWORDS; i++)
         for (j = 0; j < CODEWORDS; j++)
-            dis1 += e_dis(speaker1[i], speaker2[j], MEL_COEFFICIENTS);
-    return (dis1 / (CODEWORDS * CODEWORDS));
+            dis += e_dis(speaker1[i], speaker2[j], MEL_COEFFICIENTS);
+    return (dis / (CODEWORDS * CODEWORDS));
 }
 
 void save(float speaker[CODEWORDS][MEL_COEFFICIENTS + 1], char *name)
