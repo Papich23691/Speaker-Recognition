@@ -13,7 +13,7 @@ int *filter_points()
     return filters;
 }
 
-void filter_banks(float complex *bins, float *banks[FILTERS])
+void filter_banks(float complex *bins, float banks[FILTERS])
 {
     int i, j;
     int filters[FILTERS + 2];
@@ -37,11 +37,11 @@ void filter_banks(float complex *bins, float *banks[FILTERS])
             frequency = creal(bins[j]);
             sum += filter * frequency;
         }
-        (*banks)[i] = log10(sum);
+        banks[i] = log10(sum);
     }
 }
 
-void dct(float banks[FILTERS], float *mfcc[FILTERS])
+void dct(float banks[FILTERS], float mfcc[FILTERS])
 {
     int i, j;
     float sum;
@@ -51,22 +51,22 @@ void dct(float banks[FILTERS], float *mfcc[FILTERS])
         for (j = 0; j < FILTERS; j++)
             sum += banks[j] * cos((2 * j + 1) * i * M_PI / (FILTERS * 2));
 
-        (*mfcc)[i] = 2 * sum;
+        mfcc[i] = 2 * sum;
     }
 }
 
-void mfcc(float *f_vector[MEL_COEFFICIENTS])
+void mfcc(float f_vector[FRAMES][MEL_COEFFICIENTS])
 {
     int i, j;
     float complex frames[FRAMES][FRAME_SIZE];
     float complex *bins = (float complex *)malloc(sizeof(float complex) * FRAME_SIZE);
-    float *filters = (float *)malloc(sizeof(float) * FILTERS);
-    float *mc = (float *)malloc(sizeof(float) * FILTERS);
+    float filters[FILTERS];
+    float mc[FILTERS];
     paData data;
 
     /* Recording */
     record(&data);
-    playback(data);
+    //playback(data);
 
     /* Pre emphasis and framing */
     float *arr = (float *)malloc(sizeof(float) * data.maxFrameIndex);
@@ -86,16 +86,13 @@ void mfcc(float *f_vector[MEL_COEFFICIENTS])
         power_spectrum(&bins);
 
         /* Passing through mel filter banks */
-        filter_banks(bins, &filters);
+        filter_banks(bins, filters);
 
         /* Getting MFCC coefficients */
-        dct(filters, &mc);
+        dct(filters, mc);
+
         for (j = 0; j < MEL_COEFFICIENTS; j++)
-            (*f_vector)[j] += (float)mc[j];
+            f_vector[i][j] = (float)mc[j];
     }
-    free(mc);
-    free(filters);
     free(bins);
-    for (i = 0; i < MEL_COEFFICIENTS; i++)
-        (*f_vector)[i] /= FRAMES;
 }
