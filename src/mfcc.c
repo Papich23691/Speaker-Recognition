@@ -81,7 +81,7 @@ void mfcc(float f_vector[FRAMES][MEL_COEFFICIENTS])
     {
         /* Fast Fourier Transform */
         fft(frames[i], &bins, FRAME_SIZE);
-        
+
         /* Power Spectrum */
         power_spectrum(&bins);
 
@@ -91,8 +91,18 @@ void mfcc(float f_vector[FRAMES][MEL_COEFFICIENTS])
         /* Getting MFCC coefficients */
         dct(filters, mc);
 
-        for (j = 0; j < MEL_COEFFICIENTS; j++)
+        for (j = 0; j < MEL_NO_DELTAS; j++)
             f_vector[i][j] = (float)mc[j];
     }
+    delta(f_vector, DELTA);
+    delta(f_vector, D_DELTA);
     free(bins);
+}
+
+void delta(float f_vector[FRAMES][MEL_COEFFICIENTS], int state)
+{
+    int i, j;
+    for (i = 1; i < (FRAMES - 1); i++)
+        for (j = (MEL_NO_DELTAS + (MEL_NO_DELTAS * state)); j < (MEL_NO_DELTAS * N + (MEL_NO_DELTAS * state)); j++)
+            f_vector[i][j] = (f_vector[i + 1][j - MEL_NO_DELTAS] + pow(-1, !state) * f_vector[i - 1][j - MEL_NO_DELTAS] + (state * -N * f_vector[i][j - MEL_NO_DELTAS])) / pow(N, !state);
 }

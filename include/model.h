@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "mfcc.h"
 
-#define CODEWORDS 32
+#define CODEWORDS 64
 
 /* float cos_sim(float *v1, float *v2, int dimension); */
 float dot(float *v1, float *v2, int dimension);
