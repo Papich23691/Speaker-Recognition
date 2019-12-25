@@ -116,24 +116,31 @@ void model(float codebook[CODEWORDS][MEL_COEFFICIENTS + 1])
 /* Compared by using average distortion */
 float compare(float speaker1[CODEWORDS][MEL_COEFFICIENTS + 1], float speaker2[CODEWORDS][MEL_COEFFICIENTS + 1])
 {
-    float dis = 0;
+    float sum = 0, dis = 0, min_dis = 0;
     int i, j;
     for (i = 0; i < CODEWORDS; i++)
-        for (j = 0; j < CODEWORDS; j++)
-            dis += e_dis(speaker1[i], speaker2[j], MEL_COEFFICIENTS);
-    return (dis / (CODEWORDS * CODEWORDS));
+    {
+        min_dis = e_dis(speaker1[i], speaker2[0], MEL_COEFFICIENTS);
+        for (j = 1; j < CODEWORDS; j++)
+        {
+            dis = e_dis(speaker1[i], speaker2[j], MEL_COEFFICIENTS);
+            min_dis = dis < min_dis ? dis : min_dis;
+        }
+        sum += min_dis;
+    }
+    return 1 / (1 + (sum / CODEWORDS));
 }
 
 void save(float speaker[CODEWORDS][MEL_COEFFICIENTS + 1], char *name)
 {
     FILE *f = fopen(name, "wb");
-    fwrite(speaker, sizeof(float),CODEWORDS * (MEL_COEFFICIENTS + 1), f);
+    fwrite(speaker, sizeof(float), CODEWORDS * (MEL_COEFFICIENTS + 1), f);
     fclose(f);
 }
 
 void load(float (*speaker)[CODEWORDS][MEL_COEFFICIENTS + 1], char *name)
 {
     FILE *f = fopen(name, "rb");
-    fread(speaker, sizeof(float),CODEWORDS * (MEL_COEFFICIENTS + 1), f);
+    fread(speaker, sizeof(float), CODEWORDS * (MEL_COEFFICIENTS + 1), f);
     fclose(f);
 }

@@ -5,8 +5,11 @@
 
 int main(void)
 {
-    float speaker[CODEWORDS][MEL_COEFFICIENTS + 1];
-    model(speaker);
-    save(speaker, "speaker.data");
+    float speaker1[CODEWORDS][MEL_COEFFICIENTS + 1];
+    float speaker2[CODEWORDS][MEL_COEFFICIENTS + 1];
+    model(speaker1);
+    model(speaker2);
+    printf("Score = %f\n",compare(speaker1,speaker2));
+    save(speaker1,"speaker1.data");
     return 0;
 }
